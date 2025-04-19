@@ -1,49 +1,19 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue';
+import { ref, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
 
-const userType = ref('');
+const router = useRouter();
+const userRole = ref('');
 
-// Initialize userType from localStorage on component mount
+// Initialize userRole from localStorage and redirect if not a lender
 onMounted(() => {
   const storedRole = localStorage.getItem('userRole');
-  if (storedRole) {
-    userType.value = storedRole;
+  if (storedRole !== 'lender') {
+    router.push('/dashboard');
+    return;
   }
+  userRole.value = storedRole;
 });
-
-// Mock data for lenders
-const lenderMatches = [
-  {
-    id: 1,
-    name: "Growth Capital Fund",
-    amount: "Up to $50,000",
-    interestRate: "8-12%",
-    matchScore: 94,
-    industry: "Technology, Healthcare",
-    description: "Specialized in funding early-stage startups with proven market traction",
-    fundingHistory: "50+ successful loans"
-  },
-  {
-    id: 2,
-    name: "Small Business First",
-    amount: "Up to $25,000",
-    interestRate: "6-9%",
-    matchScore: 88,
-    industry: "Retail, Services",
-    description: "Focus on established small businesses with steady revenue",
-    fundingHistory: "100+ loans funded"
-  },
-  {
-    id: 3,
-    name: "Innovation Funders",
-    amount: "Up to $75,000",
-    interestRate: "10-15%",
-    matchScore: 82,
-    industry: "Technology, Manufacturing",
-    description: "Supporting innovative businesses with high growth potential",
-    fundingHistory: "25+ tech startups funded"
-  }
-];
 
 // Mock data for borrowers
 const borrowerMatches = [
@@ -79,14 +49,6 @@ const borrowerMatches = [
   }
 ];
 
-const matches = computed(() => 
-  userType.value === 'borrower' ? lenderMatches : borrowerMatches
-);
-
-const pageTitle = computed(() => 
-  userType.value === 'lender' ? 'Find Matching Borrowers' : 'Find Matching Lenders'
-);
-
 const handleConnect = (matchId: number) => {
   // This would be handled by your backend
   console.log(`Connecting with match ID: ${matchId}`);
@@ -96,7 +58,7 @@ const handleConnect = (matchId: number) => {
 <template>
   <div class="min-h-screen bg-gray-100 py-10">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <h1 class="text-3xl font-bold leading-tight text-gray-900">{{ pageTitle }}</h1>
+      <h1 class="text-3xl font-bold leading-tight text-gray-900">Find Matching Borrowers</h1>
       
       <!-- AI Match Score Legend -->
       <div class="mt-4 bg-white p-4 rounded-lg shadow">
@@ -120,7 +82,7 @@ const handleConnect = (matchId: number) => {
 
       <!-- Matches List -->
       <div class="mt-8 space-y-4">
-        <div v-for="match in matches" :key="match.id" class="bg-white shadow rounded-lg overflow-hidden">
+        <div v-for="match in borrowerMatches" :key="match.id" class="bg-white shadow rounded-lg overflow-hidden">
           <div class="p-6">
             <div class="flex items-center justify-between">
               <h2 class="text-xl font-semibold text-gray-900">{{ match.name }}</h2>
@@ -137,41 +99,22 @@ const handleConnect = (matchId: number) => {
             </div>
             
             <div class="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
-              <!-- Lender-specific information -->
-              <template v-if="userType.value === 'borrower'">
-                <div>
-                  <span class="text-sm text-gray-500">Loan Range:</span>
-                  <p class="text-lg font-medium text-gray-900">{{ match.amount }}</p>
-                </div>
-                <div>
-                  <span class="text-sm text-gray-500">Interest Rate:</span>
-                  <p class="text-lg font-medium text-gray-900">{{ match.interestRate }}</p>
-                </div>
-                <div>
-                  <span class="text-sm text-gray-500">Track Record:</span>
-                  <p class="text-lg font-medium text-gray-900">{{ match.fundingHistory }}</p>
-                </div>
-              </template>
-
-              <!-- Borrower-specific information -->
-              <template v-else>
-                <div>
-                  <span class="text-sm text-gray-500">Amount Needed:</span>
-                  <p class="text-lg font-medium text-gray-900">${{ match.amount.toLocaleString() }}</p>
-                </div>
-                <div>
-                  <span class="text-sm text-gray-500">Duration:</span>
-                  <p class="text-lg font-medium text-gray-900">{{ match.duration }}</p>
-                </div>
-                <div>
-                  <span class="text-sm text-gray-500">Annual Revenue:</span>
-                  <p class="text-lg font-medium text-gray-900">{{ match.revenue }}</p>
-                </div>
-              </template>
+              <div>
+                <span class="text-sm text-gray-500">Amount Needed:</span>
+                <p class="text-lg font-medium text-gray-900">${{ match.amount.toLocaleString() }}</p>
+              </div>
+              <div>
+                <span class="text-sm text-gray-500">Duration:</span>
+                <p class="text-lg font-medium text-gray-900">{{ match.duration }}</p>
+              </div>
+              <div>
+                <span class="text-sm text-gray-500">Annual Revenue:</span>
+                <p class="text-lg font-medium text-gray-900">{{ match.revenue }}</p>
+              </div>
             </div>
 
             <div class="mt-4">
-              <span class="text-sm text-gray-500">Preferred Industries:</span>
+              <span class="text-sm text-gray-500">Industry:</span>
               <p class="text-lg font-medium text-gray-900">{{ match.industry }}</p>
             </div>
 

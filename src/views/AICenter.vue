@@ -71,7 +71,7 @@ const analyzeContract = async () => {
     const progressPromise = simulateProgress();
     
     // Make the API call
-    const response = await api.post('/ai/contract', {
+    const response = await api.post('/api/ai/contract', {
       text: contractText.value
     });
     
@@ -140,7 +140,7 @@ const handleLeafClick = async (data: { key: string; value: any }) => {
       explanationTimeout = setTimeout(resolve, 500);
     });
 
-    const response = await api.post('/ai/explain', {
+    const response = await api.post('/api/ai/explain', {
       key: data.key,
       value: data.value,
       fullJsonString: JSON.stringify(rawAnalysis.value)

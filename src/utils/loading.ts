@@ -24,13 +24,13 @@ export const useLoadingState = () => {
   const setError = (message: string) => {
     error.value = message;
     success.value = '';
-    isLoading.value = false;
+    stopLoading();
   };
 
   const setSuccess = (message: string) => {
     success.value = message;
     error.value = '';
-    isLoading.value = false;
+    stopLoading();
 
     // Auto-clear success message after 3 seconds
     setTimeout(() => {

@@ -3,16 +3,15 @@ import Home from '../views/Home.vue';
 import Dashboard from '../views/Dashboard.vue';
 import LoanApplication from '../views/LoanApplication.vue';
 import LoanReview from '../views/LoanReview.vue';
-import Transactions from '../views/Transactions.vue';
 import Support from '../views/Support.vue';
 import BusinessProfile from '../views/BusinessProfile.vue';
 import LendingPreferences from '../views/LendingPreferences.vue';
-import FindMatch from '../views/FindMatch.vue';
 import AICenter from '../views/AICenter.vue';
 import Login from '../views/Login.vue';
 import Register from '../views/Register.vue';
 import BorrowerRegistration from '../views/BorrowerRegistration.vue';
 import LenderRegistration from '../views/LenderRegistration.vue';
+import AcceptedLoans from '../views/AcceptedLoans.vue';
 
 const routes = [
   {
@@ -56,9 +55,17 @@ const routes = [
     component: LoanReview
   },
   {
-    path: '/transactions',
-    name: 'Transactions',
-    component: Transactions
+    path: '/accepted-loans',
+    name: 'AcceptedLoans',
+    component: AcceptedLoans,
+    beforeEnter: (to, from, next) => {
+      const userRole = localStorage.getItem('userRole');
+      if (userRole === 'lender') {
+        next();
+      } else {
+        next('/dashboard');
+      }
+    }
   },
   {
     path: '/support',
@@ -74,11 +81,6 @@ const routes = [
     path: '/lending-preferences',
     name: 'LendingPreferences',
     component: LendingPreferences
-  },
-  {
-    path: '/find-match',
-    name: 'FindMatch',
-    component: FindMatch
   },
   {
     path: '/ai-center',

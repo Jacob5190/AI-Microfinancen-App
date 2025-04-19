@@ -27,21 +27,21 @@ const showNav = computed(() => {
 
 const navigationItems = computed(() => {
   const commonItems = [
-    { to: '/dashboard', label: 'Home' },
-    { to: '/find-match', label: 'Find Match' },
-    { to: '/transactions', label: 'Transactions' },
-    { to: '/support', label: 'Support' }
+    { to: '/dashboard', label: 'Home' }
   ];
 
   const borrowerItems = [
     { to: '/loan-application', label: 'Apply for Loan' },
     { to: '/business-profile', label: 'Business Profile' },
-    { to: '/ai-center', label: 'AI Center' }
+    { to: '/ai-center', label: 'AI Center' },
+    { to: '/support', label: 'Support' }
   ];
 
   const lenderItems = [
-    { to: '/loan-review', label: 'Review Loans' },
-    { to: '/lending-preferences', label: 'Lending Preferences' }
+    { to: '/loan-review', label: 'Match Borrower' },
+    { to: '/accepted-loans', label: 'Accepted Loans' },
+    { to: '/lending-preferences', label: 'Lending Preferences' },
+    { to: '/support', label: 'Support' }
   ];
 
   return [
