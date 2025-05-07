@@ -1,84 +1,61 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref } from 'vue';
 import { useRouter } from 'vue-router';
-import api from '../api/axios';
-import { useLoadingState } from '../utils/loading';
-import LoadingSpinner from '../components/LoadingSpinner.vue';
-import AlertMessage from '../components/AlertMessage.vue';
 
 const router = useRouter();
 const userRole = ref(localStorage.getItem('userRole') || '');
 const userFirstName = ref(localStorage.getItem('userFirstName') || '');
 
-interface DashboardStats {
-  activeLoans: number;
-  totalAmount: number;
-  riskScore: number | null;
-  pendingApplications?: number;
-  approvedApplications?: number;
-  totalInvestment?: number;
-}
-
-const stats = ref<DashboardStats>({
-  activeLoans: 0,
-  totalAmount: 0,
-  riskScore: null
-});
-
-const { isLoading, error, startLoading, setError } = useLoadingState();
-
-const loadDashboardStats = async () => {
-  try {
-    startLoading();
-    const userId = localStorage.getItem('userId');
-    if (!userId) {
-      throw new Error('User ID not found');
-    }
-
-    const response = await api.get(`/api/dashboard/${userId}`);
-    stats.value = response.data;
-  } catch (err: any) {
-    setError(err.response?.data?.message || 'Failed to load dashboard data');
-  }
-};
-
-onMounted(loadDashboardStats);
-
-const formatCurrency = (amount: number) => {
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD'
-  }).format(amount);
-};
-
-const getStatItems = () => {
-  const commonStats = [
-    { name: 'Active Loans', value: stats.value.activeLoans.toString() },
-    { name: 'Total Amount', value: formatCurrency(stats.value.totalAmount) }
-  ];
-
-  if (userRole.value === 'borrower') {
-    return [
-      ...commonStats,
-      { name: 'Risk Score', value: stats.value.riskScore ? `${stats.value.riskScore}%` : 'N/A' }
-    ];
-  } else {
-    return [
-      ...commonStats,
-      { name: 'Pending Applications', value: stats.value.pendingApplications?.toString() || '0' },
-      { name: 'Approved Applications', value: stats.value.approvedApplications?.toString() || '0' },
-      { name: 'Total Investment', value: formatCurrency(stats.value.totalInvestment || 0) }
-    ];
-  }
-};
-
 const navigateToAction = () => {
   if (userRole.value === 'borrower') {
     router.push('/loan-application');
   } else {
-    router.push('/loan-review');
+    router.push('/find-match');
   }
 };
+
+const features = [
+  {
+    title: 'AI-Powered Matching',
+    description: 'Our advanced algorithms connect borrowers with the right lenders based on multiple criteria.',
+    color: 'bg-blue-500'
+  },
+  {
+    title: 'Quick Processing',
+    description: 'Fast and efficient loan processing with minimal paperwork and quick approvals.',
+    color: 'bg-green-500'
+  },
+  {
+    title: 'Secure Platform',
+    description: 'Enterprise-grade security to protect your sensitive information and transactions.',
+    color: 'bg-purple-500'
+  },
+  {
+    title: 'Smart Analytics',
+    description: 'Detailed insights and analytics to help you make informed decisions.',
+    color: 'bg-indigo-500'
+  }
+];
+
+const quickActions = [
+  {
+    title: userRole.value === 'borrower' ? 'Apply for Loan' : 'Find Borrowers',
+    description: userRole.value === 'borrower' 
+      ? 'Start your loan application process'
+      : 'Browse and connect with potential borrowers',
+    action: navigateToAction
+  },
+  {
+    title: 'View Profile',
+    description: 'Update your personal and business information',
+    action: () => router.push(userRole.value === 'borrower' ? '/business-profile' : '/lending-preferences')
+  },
+  {
+    title: 'Get Support',
+    description: 'Contact our support team for assistance',
+    action: () => router.push('/support')
+  }
+];
 </script>
 
 <template>
@@ -89,70 +66,62 @@ const navigateToAction = () => {
         <h1 class="text-3xl font-bold leading-tight text-gray-900">
           Welcome back, {{ userFirstName }}!
         </h1>
-      </div>
-
-      <!-- Alert for any errors -->
-      <div v-if="error" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4">
-        <AlertMessage
-          type="error"
-          :message="error"
-          dismissible
-        />
-      </div>
-
-      <!-- Loading state -->
-      <div v-if="isLoading" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-8">
-        <div class="flex justify-center">
-          <LoadingSpinner size="lg" />
+        
+        <!-- Quick Actions -->
+        <div class="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <div
+            v-for="action in quickActions"
+            :key="action.title"
+            class="relative rounded-lg border border-gray-300 bg-white px-6 py-5 shadow-sm flex items-center space-x-3 hover:border-gray-400 focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-indigo-500 cursor-pointer"
+            @click="action.action"
+          >
+            <div class="flex-1 min-w-0">
+              <span class="absolute inset-0" aria-hidden="true" />
+              <p class="text-lg font-medium text-gray-900">
+                {{ action.title }}
+              </p>
+              <p class="text-sm text-gray-500 truncate">
+                {{ action.description }}
+              </p>
+            </div>
+          </div>
         </div>
-      </div>
 
-      <div v-else>
-        <!-- Stats -->
-        <div class="mt-8">
-          <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="mt-2 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-              <div
-                v-for="item in getStatItems()"
-                :key="item.name"
-                class="bg-white overflow-hidden shadow rounded-lg"
-              >
-                <div class="px-4 py-5 sm:p-6">
-                  <dt class="text-sm font-medium text-gray-500 truncate">{{ item.name }}</dt>
-                  <dd class="mt-1 text-3xl font-semibold text-gray-900">{{ item.value }}</dd>
-                </div>
+        <!-- Features Grid -->
+        <div class="mt-12">
+          <h2 class="text-2xl font-semibold text-gray-900 mb-6">Platform Features</h2>
+          <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <div
+              v-for="feature in features"
+              :key="feature.title"
+              class="relative rounded-lg bg-white px-6 py-5 shadow-sm flex items-center space-x-3"
+            >
+              <div class="flex-shrink-0">
+                <div :class="[feature.color, 'h-10 w-10 rounded-full']" />
+              </div>
+              <div class="flex-1 min-w-0">
+                <p class="text-lg font-medium text-gray-900">
+                  {{ feature.title }}
+                </p>
+                <p class="text-sm text-gray-500">
+                  {{ feature.description }}
+                </p>
               </div>
             </div>
           </div>
         </div>
 
-        <!-- Action Card -->
-        <div class="mt-8">
-          <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="bg-white shadow sm:rounded-lg">
-              <div class="px-4 py-5 sm:p-6">
-                <h3 class="text-lg leading-6 font-medium text-gray-900">
-                  {{ userRole === 'borrower' ? 'Apply for a New Loan' : 'Review Loan Applications' }}
-                </h3>
-                <div class="mt-2 max-w-xl text-sm text-gray-500">
-                  <p>
-                    {{ 
-                      userRole === 'borrower' 
-                        ? 'Get started with your loan application today.'
-                        : 'Review and approve pending loan applications.'
-                    }}
-                  </p>
-                </div>
-                <div class="mt-5">
-                  <button
-                    @click="navigateToAction"
-                    type="button"
-                    class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                  >
-                    {{ userRole === 'borrower' ? 'Start Application' : 'View Applications' }}
-                  </button>
-                </div>
-              </div>
+        <!-- Resources Section -->
+        <div class="mt-12 bg-white rounded-lg shadow">
+          <div class="px-6 py-5">
+            <h2 class="text-2xl font-semibold text-gray-900 mb-4">Resources & Tips</h2>
+            <div class="prose prose-sm max-w-none">
+              <ul class="space-y-2">
+                <li>Keep your profile information up to date for better matching</li>
+                <li>Review all terms and conditions carefully before accepting any loan offers</li>
+                <li>Contact support if you need assistance with your application</li>
+                <li>Enable two-factor authentication for enhanced security</li>
+              </ul>
             </div>
           </div>
         </div>
@@ -160,3 +129,10 @@ const navigateToAction = () => {
     </main>
   </div>
 </template>
+
+<style>
+.prose ul {
+  list-style-type: disc;
+  padding-left: 1.5rem;
+}
+</style>

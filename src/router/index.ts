@@ -2,7 +2,6 @@ import { createRouter, createWebHistory } from 'vue-router';
 import Home from '../views/Home.vue';
 import Dashboard from '../views/Dashboard.vue';
 import LoanApplication from '../views/LoanApplication.vue';
-import LoanReview from '../views/LoanReview.vue';
 import Support from '../views/Support.vue';
 import BusinessProfile from '../views/BusinessProfile.vue';
 import LendingPreferences from '../views/LendingPreferences.vue';
@@ -12,6 +11,7 @@ import Register from '../views/Register.vue';
 import BorrowerRegistration from '../views/BorrowerRegistration.vue';
 import LenderRegistration from '../views/LenderRegistration.vue';
 import AcceptedLoans from '../views/AcceptedLoans.vue';
+import FindMatch from '../views/FindMatch.vue';
 
 const routes = [
   {
@@ -50,9 +50,17 @@ const routes = [
     component: LoanApplication
   },
   {
-    path: '/loan-review',
-    name: 'LoanReview',
-    component: LoanReview
+    path: '/find-match',
+    name: 'FindMatch',
+    component: FindMatch,
+    beforeEnter: (to, from, next) => {
+      const userRole = localStorage.getItem('userRole');
+      if (userRole === 'lender') {
+        next();
+      } else {
+        next('/dashboard');
+      }
+    }
   },
   {
     path: '/accepted-loans',

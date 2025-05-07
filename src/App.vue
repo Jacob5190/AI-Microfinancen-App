@@ -38,7 +38,7 @@ const navigationItems = computed(() => {
   ];
 
   const lenderItems = [
-    { to: '/loan-review', label: 'Match Borrower' },
+    { to: '/find-match', label: 'Match Borrower' },
     { to: '/accepted-loans', label: 'Accepted Loans' },
     { to: '/lending-preferences', label: 'Lending Preferences' },
     { to: '/support', label: 'Support' }
